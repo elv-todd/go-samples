@@ -13,9 +13,10 @@ import (
 
 const (
 	numPollers     = 2                // number of Poller goroutines to launch
-	pollInterval   = 7 * time.Second  // how often to poll each URL
+	pollInterval   = 2 * time.Second  // how often to poll each URL
 	statusInterval = 3 * time.Second  // how often to log status to stdout
 	errTimeout     = 10 * time.Second // back-off timeout on error
+	maxPolls       = 8                // only do it this many times
 )
 
 var urls = []string{
@@ -86,6 +87,7 @@ func (r *Resource) Sleep(done chan<- *Resource) {
 }
 
 func Poller(in <-chan *Resource, out chan<- *Resource, status chan<- State) {
+	count := 0
 	for r := range in {
 		s := r.Poll()
 		status <- State{
@@ -95,6 +97,11 @@ func Poller(in <-chan *Resource, out chan<- *Resource, status chan<- State) {
 				time.Now().Hour(), time.Now().Minute(), time.Now().Second()),
 		}
 		out <- r
+		count++
+		log.Println("count", count)
+		if count > maxPolls {
+			close(out)
+		}
 	}
 }
 
@@ -120,4 +127,5 @@ func main() {
 	for r := range complete {
 		go r.Sleep(pending)
 	}
+
 }

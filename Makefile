@@ -3,6 +3,9 @@ run:
 	@#go run .
 	for i in `ls -rt *go`; do echo "--"; echo "go run $$i" ; go run $$i; done
 
+solana:
+	go1.18 run solana.go
+
 flow:
 	go1.18 run flow-get.go
 
