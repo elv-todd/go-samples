@@ -1,6 +1,11 @@
 
 run:
-	@#go run .
+	go1.18 run compare.go
+
+build:
+	go1.18 build -o base58 base58.go
+
+all:
 	for i in `ls -rt *go`; do echo "--"; echo "go run $$i" ; go run $$i; done
 
 solana:
